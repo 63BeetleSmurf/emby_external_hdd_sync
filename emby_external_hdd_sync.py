@@ -31,6 +31,7 @@ import json
 import pyudev
 import time
 import smtplib, ssl
+import yaml
 
 # Source path if different from what emby thinks
 #  Such as emby being in container with path mounted to /mnt/Videos/
@@ -174,6 +175,27 @@ def email_notification():
         server.sendmail(MAIL_SENDER, MAIL_RECEIVER, MAIL_MESSAGE)
 
 def main(args):
+
+    # Load config if available
+    config_file = os.path.abspath(os.path.dirname(__file__)) + '/config.yml'
+    if os.path.exists(config_file):
+        with open(config_file, 'r') as fh:
+            config = yaml.safe_load(fh)
+        if 'drive' in config:
+            DRIVE_SOURCE_PATH = config['drive']['source_path']
+            DRIVE_TARGET_UUID = config['drive']['target_uuid']
+        if 'emby' in config:
+            EMBY_SERVER = config['emby']['server']
+            EMBY_USER_ID = config['emby']['user_id']
+            EMBY_USER_NAME = config['emby']['user_name']
+            EMBY_USER_PASS = config['emby']['user_pass']
+            EMBY_PLAYLIST_ID = config['emby']['playlist_id']
+        if 'mail' in config:
+            MAIL_SMTP_PORT = config['mail']['smtp_port']
+            MAIL_SMTP_SERVER = config['mail']['smtp_server']
+            MAIL_SENDER = config['mail']['sender']
+            MAIL_RECEIVER = config['mail']['receiver']
+            MAIL_PASSWORD = config['mail']['password']
 
     context = pyudev.Context()
     monitor = pyudev.Monitor.from_netlink(context)
